@@ -5,8 +5,8 @@ import (
 )
 
 type Command struct {
-	command *cobra.Command
-	flags map[string]*Flag
+	command     *cobra.Command
+	flags       map[string]*Flag
 	subCommands map[string]*Command
 }
 
@@ -38,6 +38,9 @@ func (c *Command) AddCommand(command *Command) {
 	c.command.AddCommand(command.command)
 	c.subCommands[command.GetName()] = command
 }
+func (c *Command) HasSubCommand(name string) bool {
+	return c.subCommands[name] != nil
+}
 func (c *Command) AddCommands(commands []*Command) {
 	for _, command := range commands {
 		c.AddCommand(command)
@@ -46,8 +49,15 @@ func (c *Command) AddCommands(commands []*Command) {
 func (c *Command) GetName() string {
 	return c.command.Use
 }
+func (c *Command) GetLong() string {
+	return c.command.Long
+}
+func (c *Command) GetShort() string {
+	return c.command.Short
+}
+
 func (c *Command) AddFlag(flag *Flag) {
-	c.command.Flags().VarP(flag.Value,flag.Name,flag.Shorthand,flag.Usage)
+	c.command.Flags().VarP(flag.Value, flag.Name, flag.Shorthand, flag.Usage)
 	c.flags[flag.Name] = flag
 	if flag.IsNoOption {
 		c.SetFlagNoOptionDefaultValue(flag.Name, flag.NoOptionDefaultValue)
@@ -59,13 +69,13 @@ func (c *Command) AddFlags(flags []*Flag) {
 		c.AddFlag(flag)
 	}
 }
-func (c *Command) GetFlag(name string) *Flag{
+func (c *Command) GetFlag(name string) *Flag {
 	return c.flags[name]
 }
 func (c *Command) HasFlag(name string) bool {
 	return c.flags[name] != nil
 }
-func (c *Command) SetFlagNoOptionDefaultValue(name ,value string) {
+func (c *Command) SetFlagNoOptionDefaultValue(name, value string) {
 	c.command.Flags().Lookup(name).NoOptDefVal = value
 
 }
